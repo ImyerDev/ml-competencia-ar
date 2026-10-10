@@ -132,6 +132,22 @@
     }));
   }
 
+  // El logo de Full es un <svg aria-label="FULL"> dentro del bloque de envío.
+  // No se busca "FULL" en el texto de la tarjeta: títulos como "Smart TV FULL HD"
+  // daban falsos positivos.
+  const SHIPPING_SELECTORS =
+    ".poly-component__shipped-from, .poly-component__shipping, .ui-search-item__shipping, .ui-search-item__fulfillment";
+
+  function isFulfillmentCard(card) {
+    if (card.querySelector('.ui-search-item__fulfillment, [aria-label="FULL" i], svg[class*="fulfillment" i]')) {
+      return true;
+    }
+    for (const node of card.querySelectorAll(SHIPPING_SELECTORS)) {
+      if (/\bfull\b/i.test(node.textContent) || node.querySelector('svg[aria-label*="full" i]')) return true;
+    }
+    return false;
+  }
+
   async function searchViaHtml(query) {
     const slug = query.trim().replace(/\s+/g, "-");
     const res = await bgFetch(`https://listado.mercadolibre.com.ar/${encodeURIComponent(slug)}`, "text");
@@ -170,9 +186,7 @@
       seen.add(key);
 
       const text = card.textContent || "";
-      const full =
-        !!card.querySelector('[aria-label*="full" i], .ui-search-item__fulfillment, svg[class*="full" i]') ||
-        /\bFULL\b/.test(text);
+      const full = isFulfillmentCard(card);
       const free = /env[ií]o gratis|llega gratis/i.test(text);
 
       out.push({ id, title, price, url: href, shipping: shippingLabel({ full, free }) });
