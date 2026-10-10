@@ -7,7 +7,7 @@
 //   2. Fallback: la página de listado pública (listado.mercadolibre.com.ar),
 //      parseada con DOMParser. Se usa si la API responde 401/403.
 //
-// La lectura de resultados vive en parser.js (compartido con el chequeo diario).
+// La lectura de resultados vive en parser.js (compartido con scripts/healthcheck.js).
 
 (() => {
   "use strict";

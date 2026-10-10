@@ -70,23 +70,22 @@ El token se guarda solo en tu navegador (`chrome.storage.local`) y únicamente s
 ```
 ├── manifest.json   # Configuración MV3, permisos y content scripts
 ├── background.js   # Service worker: hace los fetch (evita CORS)
-├── parser.js       # Lectura de resultados (compartida con el chequeo diario)
+├── parser.js       # Lectura de resultados (compartida con el chequeo)
 ├── content.js      # Detección del producto, búsqueda y panel flotante
 ├── popup.html      # Interfaz del popup
 ├── popup.js        # Lógica del popup
 ├── styles.css      # Estilos compartidos (popup + panel)
-├── scripts/healthcheck.js       # Chequeo diario contra MercadoLibre
+├── scripts/healthcheck.js       # Chequeo contra MercadoLibre real
 ├── test/                        # Pruebas del parser (sin red)
 └── .github/workflows/healthcheck.yml
 ```
 
-## Chequeo diario automático
+## Pruebas y chequeo contra MercadoLibre
 
-Todos los días a las 8:17 (hora de Argentina) GitHub Actions busca productos reales en MercadoLibre con el mismo código que usa la extensión (`parser.js`). Si MercadoLibre cambia su sitio y la extensión deja de leer resultados o de detectar el envío Full, el chequeo falla y GitHub manda un mail al dueño del repositorio.
-
-- Resultado: pestaña **Actions** → **Chequeo diario de MercadoLibre**.
-- Para correrlo a mano: **Actions** → **Chequeo diario de MercadoLibre** → **Run workflow**.
-- GitHub pausa los chequeos programados si el repo pasa 60 días sin cambios; avisa por mail y se reactiva con un clic.
+- **Pruebas del parser** (`test/`): corren solas en GitHub Actions en cada cambio. Verifican la lectura de resultados con un listado de ejemplo, sin conexión.
+- **Chequeo contra el sitio real** (`scripts/healthcheck.js`): busca productos reales con el mismo código que usa la extensión (`parser.js`). Se corre a mano: **Actions** → **Chequeo de MercadoLibre** → **Run workflow**.
+  - MercadoLibre bloquea las búsquedas que vienen de los servidores de GitHub: la API responde 403 y el listado pide verificación. Por eso no corre todos los días; fallaría siempre aunque la extensión funcione.
+  - En una PC normal sí funciona: `npm install` y `npm run healthcheck`.
 
 Para correr las pruebas en tu PC: `npm install` y `npm test`. No cargues en Chrome una carpeta que tenga `node_modules`: Chrome rechaza algunos archivos de esa carpeta. Usá el ZIP descargado de GitHub o borrá `node_modules` antes.
 

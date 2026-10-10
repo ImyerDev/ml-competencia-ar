@@ -1,5 +1,5 @@
 // ML Competencia AR — lógica de parseo compartida.
-// La usan el content script (navegador) y el chequeo diario (Node, en
+// La usan el content script (navegador) y el chequeo contra el sitio (Node, en
 // scripts/healthcheck.js), así ambos prueban exactamente los mismos selectores.
 
 (function (root) {

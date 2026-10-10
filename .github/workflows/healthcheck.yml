@@ -1,9 +1,11 @@
-name: Chequeo diario de MercadoLibre
+name: Chequeo de MercadoLibre
+
+# El chequeo contra el sitio real corre solo a mano: MercadoLibre bloquea las
+# búsquedas que vienen de los servidores de GitHub (403 en la API y pedido de
+# verificación en el listado), así que un chequeo diario fallaría siempre.
+# Sirve si en el futuro se corre desde una red que MercadoLibre no bloquee.
 
 on:
-  schedule:
-    # Todos los días a las 8:17 de Argentina (11:17 UTC).
-    - cron: "17 11 * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -28,6 +30,7 @@ jobs:
   mercadolibre:
     name: Búsqueda real en MercadoLibre
     needs: tests
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

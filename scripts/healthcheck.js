@@ -1,8 +1,8 @@
-// Chequeo diario: ¿la extensión todavía puede leer la competencia en MercadoLibre?
+// Chequeo: ¿la extensión todavía puede leer la competencia en MercadoLibre?
 //
 // Hace las mismas búsquedas que la extensión (API y listado web) usando
 // parser.js, y falla (exit 1) si MercadoLibre cambió algo y ya no se pueden
-// leer resultados. GitHub Actions avisa por mail cuando falla.
+// leer resultados.
 //
 // Uso: node scripts/healthcheck.js
 
@@ -87,7 +87,7 @@ async function main() {
 
   const icon = (r) => (r.ok ? "✅" : "❌");
   const lines = [
-    "## Chequeo diario de ML Competencia AR",
+    "## Chequeo de ML Competencia AR",
     "",
     "| Búsqueda | API | Listado web |",
     "|---|---|---|",
