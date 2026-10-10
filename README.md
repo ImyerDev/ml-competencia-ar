@@ -96,6 +96,12 @@ Para correr las pruebas en tu PC: `npm install` y `npm test`. No cargues en Chro
 - **Listado web:** si MercadoLibre cambia su HTML, el fallback puede dejar de leer resultados. En ese caso, actualizá los selectores de `searchViaHtml` en `content.js` o usá un token.
 - No se guarda historial: cada análisis es una foto del momento.
 
+## Reportar un problema
+
+Si la extensión no puede leer la competencia, el mensaje de error muestra el botón **Avisar que no funciona**, tanto en el popup como en el panel flotante. Debajo de la tabla también está el link **¿Algún dato se ve mal? Reportalo**.
+
+Los dos abren un reporte nuevo en GitHub, ya completo con el error, la página (sin parámetros de seguimiento), la búsqueda y la versión. Para enviarlo hace falta una cuenta de GitHub, que es gratis. El dueño del repositorio recibe un mail con cada reporte.
+
 ## 7. Contribuir
 
 Los *issues* y *pull requests* son bienvenidos. Licencia MIT: usala, modificala y compartila libremente.

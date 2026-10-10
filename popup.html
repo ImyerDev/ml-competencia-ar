@@ -63,6 +63,9 @@
 
   <main>
     <div id="status" class="mlc-muted">Cargando…</div>
+    <a id="report-error" class="mlc-btn mlc-report" target="_blank" rel="noopener noreferrer" hidden>
+      Avisar que no funciona
+    </a>
 
     <section id="result" hidden>
       <p id="product-title" class="product-title"></p>
@@ -95,6 +98,7 @@
         <span id="source"></span>
         <span id="query"></span>
       </div>
+      <a id="report-data" class="mlc-report-link" target="_blank" rel="noopener noreferrer">¿Algún dato se ve mal? Reportalo</a>
     </section>
 
     <details>
@@ -112,6 +116,7 @@
     </details>
   </main>
 
+  <script src="parser.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

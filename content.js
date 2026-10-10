@@ -12,7 +12,8 @@
 (() => {
   "use strict";
 
-  const { buildQuery, priceFromMoneyNode, mapApiResults, parseSearchDocument, searchUrl } = globalThis.MLCParser;
+  const { buildQuery, priceFromMoneyNode, mapApiResults, parseSearchDocument, searchUrl, buildIssueUrl } =
+    globalThis.MLCParser;
 
   const SITE = "MLA";
   const TOP_N = 5;
@@ -249,7 +250,20 @@
       try {
         renderPanelBody(body, await analyze());
       } catch (err) {
-        body.replaceChildren(el("p", { class: "mlc-error", text: err.message }));
+        body.replaceChildren(
+          el("p", { class: "mlc-error", text: err.message }),
+          el("a", {
+            class: "mlc-btn mlc-report",
+            href: buildIssueUrl({
+              error: err.message,
+              pageUrl: location.href,
+              version: chrome.runtime.getManifest().version
+            }),
+            target: "_blank",
+            rel: "noopener noreferrer",
+            text: "Avisar que no funciona"
+          })
+        );
       }
     });
     panel.querySelector(".mlc-close").addEventListener("click", () => (panel.hidden = true));
