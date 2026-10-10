@@ -1,0 +1,14 @@
+{
+  "name": "ml-competencia-ar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Extensión de Chrome para analizar la competencia en MercadoLibre Argentina.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "healthcheck": "node scripts/healthcheck.js"
+  },
+  "devDependencies": {
+    "linkedom": "^0.18.5"
+  }
+}

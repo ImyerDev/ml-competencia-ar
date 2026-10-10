@@ -6,9 +6,13 @@
 //   1. API pública de búsqueda: /sites/MLA/search (con token si el usuario lo cargó).
 //   2. Fallback: la página de listado pública (listado.mercadolibre.com.ar),
 //      parseada con DOMParser. Se usa si la API responde 401/403.
+//
+// La lectura de resultados vive en parser.js (compartido con scripts/healthcheck.js).
 
 (() => {
   "use strict";
+
+  const { buildQuery, priceFromMoneyNode, mapApiResults, parseSearchDocument, searchUrl } = globalThis.MLCParser;
 
   const SITE = "MLA";
   const TOP_N = 5;
@@ -42,22 +46,6 @@
     return (h1?.textContent || og?.content || "").trim();
   }
 
-  function parseArsNumber(text) {
-    // "1.234.567" -> 1234567
-    const n = Number(String(text).replace(/\./g, "").replace(",", ".").replace(/[^\d.]/g, ""));
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function priceFromMoneyNode(node) {
-    if (!node) return null;
-    const fraction = node.querySelector(".andes-money-amount__fraction");
-    if (!fraction) return null;
-    const cents = node.querySelector(".andes-money-amount__cents");
-    const base = parseArsNumber(fraction.textContent);
-    if (base == null) return null;
-    return cents ? base + Number(cents.textContent) / 100 : base;
-  }
-
   function getPrice() {
     const meta = document.querySelector('meta[itemprop="price"]');
     if (meta?.content && Number(meta.content) > 0) return Number(meta.content);
@@ -86,32 +74,8 @@
   // Búsqueda de competidores
   // ---------------------------------------------------------------------------
 
-  const STOPWORDS = new Set([
-    "de", "la", "el", "los", "las", "para", "con", "sin", "y", "en", "por", "un", "una", "x"
-  ]);
-
-  // Usa las primeras palabras significativas del título: más corto = más
-  // resultados; más largo = más preciso. 6 palabras es un buen balance.
-  function buildQuery(title) {
-    return title
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .replace(/[^a-z0-9ñ\s]/g, " ")
-      .split(/\s+/)
-      .filter((w) => w && !STOPWORDS.has(w))
-      .slice(0, 6)
-      .join(" ");
-  }
-
   function bgFetch(url, as, token) {
     return chrome.runtime.sendMessage({ type: "ML_FETCH", url, as, token });
-  }
-
-  function shippingLabel({ full, free }) {
-    if (full) return "Full";
-    if (free) return "Gratis";
-    return "Normal";
   }
 
   async function searchViaApi(query, token) {
@@ -120,77 +84,15 @@
     if (!res?.ok || !Array.isArray(res.data?.results)) {
       throw new Error(`API ${res?.status || "sin respuesta"}`);
     }
-    return res.data.results.map((r) => ({
-      id: r.id,
-      title: r.title,
-      price: r.price,
-      url: r.permalink,
-      shipping: shippingLabel({
-        full: r.shipping?.logistic_type === "fulfillment",
-        free: !!r.shipping?.free_shipping
-      })
-    }));
-  }
-
-  // El logo de Full es un <svg aria-label="FULL"> dentro del bloque de envío.
-  // No se busca "FULL" en el texto de la tarjeta: títulos como "Smart TV FULL HD"
-  // daban falsos positivos.
-  const SHIPPING_SELECTORS =
-    ".poly-component__shipped-from, .poly-component__shipping, .ui-search-item__shipping, .ui-search-item__fulfillment";
-
-  function isFulfillmentCard(card) {
-    if (card.querySelector('.ui-search-item__fulfillment, [aria-label="FULL" i], svg[class*="fulfillment" i]')) {
-      return true;
-    }
-    for (const node of card.querySelectorAll(SHIPPING_SELECTORS)) {
-      if (/\bfull\b/i.test(node.textContent) || node.querySelector('svg[aria-label*="full" i]')) return true;
-    }
-    return false;
+    return mapApiResults(res.data.results);
   }
 
   async function searchViaHtml(query) {
-    const slug = query.trim().replace(/\s+/g, "-");
-    const res = await bgFetch(`https://listado.mercadolibre.com.ar/${encodeURIComponent(slug)}`, "text");
+    const res = await bgFetch(searchUrl(query), "text");
     if (!res?.ok || typeof res.data !== "string") {
       throw new Error(`Listado ${res?.status || "sin respuesta"}`);
     }
-    const doc = new DOMParser().parseFromString(res.data, "text/html");
-    const cards = doc.querySelectorAll("li.ui-search-layout__item, div.poly-card");
-    const seen = new Set();
-    const out = [];
-
-    for (const card of cards) {
-      const link =
-        card.querySelector("a.poly-component__title") ||
-        card.querySelector("a.ui-search-item__group__element") ||
-        card.querySelector("a.ui-search-link") ||
-        card.querySelector("a[href*='mercadolibre.com.ar']");
-      if (!link) continue;
-
-      const href = link.href || link.getAttribute("href") || "";
-      const title = (
-        card.querySelector(".poly-component__title, .ui-search-item__title")?.textContent ||
-        link.textContent ||
-        ""
-      ).trim();
-      const price = priceFromMoneyNode(
-        card.querySelector(".poly-price__current .andes-money-amount") ||
-          card.querySelector(".andes-money-amount:not(.andes-money-amount--previous)")
-      );
-      if (!title || !price) continue;
-
-      const idMatch = href.match(/MLA-?(\d{6,})/i);
-      const id = idMatch ? `MLA${idMatch[1]}` : null;
-      const key = id || title;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      const text = card.textContent || "";
-      const full = isFulfillmentCard(card);
-      const free = /env[ií]o gratis|llega gratis/i.test(text);
-
-      out.push({ id, title, price, url: href, shipping: shippingLabel({ full, free }) });
-    }
+    const out = parseSearchDocument(new DOMParser().parseFromString(res.data, "text/html"));
     if (!out.length) throw new Error("No se pudieron leer resultados del listado");
     return out;
   }

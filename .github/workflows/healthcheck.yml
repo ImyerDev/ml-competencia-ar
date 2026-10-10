@@ -1,0 +1,42 @@
+name: Chequeo de MercadoLibre
+
+# El chequeo contra el sitio real corre solo a mano: MercadoLibre bloquea las
+# búsquedas que vienen de los servidores de GitHub (403 en la API y pedido de
+# verificación en el listado), así que un chequeo diario fallaría siempre.
+# Sirve si en el futuro se corre desde una red que MercadoLibre no bloquee.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Pruebas del parser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  mercadolibre:
+    name: Búsqueda real en MercadoLibre
+    needs: tests
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run healthcheck
