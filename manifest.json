@@ -18,7 +18,7 @@
         "https://articulo.mercadolibre.com.ar/*",
         "https://www.mercadolibre.com.ar/*"
       ],
-      "js": ["content.js"],
+      "js": ["parser.js", "content.js"],
       "css": ["styles.css"],
       "run_at": "document_idle"
     }
