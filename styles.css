@@ -45,6 +45,19 @@
   cursor: pointer;
 }
 .mlc-btn:hover { filter: brightness(1.08); }
+.mlc-report {
+  display: inline-block;
+  margin-top: 10px;
+  text-decoration: none;
+}
+.mlc-report[hidden] { display: none; }
+.mlc-report-link {
+  display: block;
+  margin-top: 8px;
+  color: var(--mlc-muted);
+  font-size: 11px;
+  text-align: center;
+}
 .mlc-btn--ghost {
   background: transparent;
   color: inherit;

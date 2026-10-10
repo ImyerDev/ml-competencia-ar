@@ -45,3 +45,19 @@ test("arma la búsqueda con las primeras 6 palabras útiles", () => {
     "auriculares inalambricos bluetooth celular microfono estuche"
   );
 });
+
+test("arma el link de reporte sin parámetros de seguimiento", () => {
+  const url = new URL(
+    parser.buildIssueUrl({
+      error: "No se pudieron leer resultados del listado",
+      pageUrl: "https://articulo.mercadolibre.com.ar/MLA-123-x-_JM?tracking_id=abc#reco",
+      version: "1.0.0"
+    })
+  );
+  assert.equal(url.origin + url.pathname, "https://github.com/ImyerDev/ml-competencia-ar/issues/new");
+  assert.match(url.searchParams.get("title"), /^No funciona: No se pudieron leer/);
+  const body = url.searchParams.get("body");
+  assert.match(body, /articulo\.mercadolibre\.com\.ar\/MLA-123-x-_JM/);
+  assert.doesNotMatch(body, /tracking_id/);
+  assert.match(body, /1\.0\.0/);
+});

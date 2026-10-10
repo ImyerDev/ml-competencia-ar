@@ -126,6 +126,32 @@
     return `https://listado.mercadolibre.com.ar/${encodeURIComponent(slug)}`;
   }
 
+  const ISSUES_URL = "https://github.com/ImyerDev/ml-competencia-ar/issues/new";
+
+  // Link a un reporte nuevo en GitHub, ya completo con los datos del problema.
+  // De la página solo se manda dominio y ruta (sin parámetros de seguimiento).
+  function buildIssueUrl({ error, pageUrl, version, source, query }) {
+    let page = pageUrl || "";
+    try {
+      const u = new URL(pageUrl);
+      page = u.origin + u.pathname;
+    } catch {}
+    const title = error ? `No funciona: ${String(error).slice(0, 80)}` : "Problema con el análisis";
+    const body = [
+      "**Qué pasó:**",
+      error ? "`" + String(error).slice(0, 300) + "`" : "(describí qué dato se ve mal)",
+      "",
+      `**Página:** ${page || "-"}`,
+      `**Búsqueda:** ${query || "-"}`,
+      `**Fuente:** ${source || "-"}`,
+      `**Versión de la extensión:** ${version || "-"}`,
+      "",
+      "_Reporte generado desde la extensión._"
+    ].join("\n");
+    const params = new URLSearchParams({ title, body });
+    return `${ISSUES_URL}?${params}`;
+  }
+
   const api = {
     buildQuery,
     parseArsNumber,
@@ -134,7 +160,8 @@
     mapApiResults,
     isFulfillmentCard,
     parseSearchDocument,
-    searchUrl
+    searchUrl,
+    buildIssueUrl
   };
 
   if (typeof module === "object" && module.exports) module.exports = api;

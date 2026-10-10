@@ -8,6 +8,14 @@ const money = new Intl.NumberFormat("es-AR", {
 });
 
 const $ = (id) => document.getElementById(id);
+const VERSION = chrome.runtime.getManifest().version;
+
+// Muestra u oculta el botón para reportar un error en GitHub.
+function setReport(error, pageUrl) {
+  const link = $("report-error");
+  link.hidden = !error;
+  if (error) link.href = MLCParser.buildIssueUrl({ error, pageUrl, version: VERSION });
+}
 
 function setStatus(text, isError = false) {
   const status = $("status");
@@ -75,6 +83,12 @@ function render(data) {
 
   $("source").textContent = source === "api" ? "Fuente: API MercadoLibre" : "Fuente: listado web";
   $("query").textContent = `Búsqueda: "${query}"`;
+  $("report-data").href = MLCParser.buildIssueUrl({
+    pageUrl: product.url,
+    version: VERSION,
+    source: source === "api" ? "API" : "listado web",
+    query
+  });
   $("result").hidden = false;
 }
 
@@ -85,6 +99,7 @@ async function getActiveTab() {
 
 async function run(force = false) {
   $("result").hidden = true;
+  setReport(null);
   setStatus("Analizando competencia…");
 
   const tab = await getActiveTab();
@@ -102,7 +117,9 @@ async function run(force = false) {
   }
 
   if (!res?.ok) {
-    setStatus(res?.error || "Error desconocido.", true);
+    const error = res?.error || "Error desconocido.";
+    setStatus(error, true);
+    setReport(error, tab.url);
     return;
   }
   setStatus("");
