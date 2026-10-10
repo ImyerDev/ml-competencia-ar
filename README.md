@@ -16,12 +16,12 @@ En una publicación muestra:
 **Opción A: con Git**
 
 ```bash
-git clone https://github.com/imyerdev/netbios1.git
+git clone https://github.com/ImyerDev/ml-competencia-ar.git
 ```
 
 **Opción B: sin Git**
 
-1. Entrá al repositorio en GitHub.
+1. Entrá a <https://github.com/ImyerDev/ml-competencia-ar>.
 2. Hacé clic en **Code → Download ZIP**.
 3. Descomprimí el ZIP en una carpeta que no vayas a borrar (Chrome carga la extensión desde ahí).
 
