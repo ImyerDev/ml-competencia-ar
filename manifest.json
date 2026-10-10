@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "ML Competencia AR",
+  "short_name": "ML Competencia",
+  "version": "1.0.0",
+  "description": "Analizá la competencia de cualquier producto de MercadoLibre Argentina: precio promedio, envío Full y top 5 competidores.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://api.mercadolibre.com/*",
+    "https://*.mercadolibre.com.ar/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://articulo.mercadolibre.com.ar/*",
+        "https://www.mercadolibre.com.ar/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Analizar competencia",
+    "default_popup": "popup.html"
+  }
+}
